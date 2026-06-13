@@ -40,16 +40,24 @@ function addToCart(slug, quantity) {
 }
 
 function buildBundleCard(bundleConfig, cartHasBeanie) {
-  var discountContent = document.querySelector('.discount-content');
+  var discountContent = document.querySelector('.detail-content.discount-open');
+  if (!discountContent) {
+    var allDetailContents = document.querySelectorAll('.detail-content');
+    discountContent = allDetailContents[allDetailContents.length - 1];
+  }
   if (!discountContent) return;
+
   var existingCard = discountContent.querySelector('.mp-bundle-card');
   if (existingCard) existingCard.remove();
+
   var buttonText = cartHasBeanie
     ? 'ADD NECKLACE — $' + bundleConfig.partnerPrice
     : 'ADD BOTH TO CART — $' + bundleConfig.bundlePrice;
+
   var savingsText = cartHasBeanie
     ? ''
     : '<p class="mp-bundle-savings" style="color:#c41e1e;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-top:4px;">YOU SAVE $' + bundleConfig.savings + '</p>';
+
   var card = document.createElement('div');
   card.className = 'mp-bundle-card';
   card.style.cssText = 'padding:16px 0;border-bottom:1px solid #1e1e1e;margin-bottom:12px;';
@@ -68,12 +76,14 @@ function buildBundleCard(bundleConfig, cartHasBeanie) {
       '</div>' +
     '</div>' +
     '<button class="mp-bundle-btn" style="width:100%;background:#f5f2ed;color:#0a0a0a;border:none;padding:14px;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;font-family:Space Mono,monospace;transition:all 0.2s ease;">' + buttonText + '</button>';
+
   var discountBlock = discountContent.querySelector('.discount-block');
   if (discountBlock) {
     discountContent.insertBefore(card, discountBlock);
   } else {
     discountContent.appendChild(card);
   }
+
   var btn = card.querySelector('.mp-bundle-btn');
   btn.addEventListener('mouseenter', function() {
     this.style.background = '#c41e1e';
@@ -88,6 +98,7 @@ function buildBundleCard(bundleConfig, cartHasBeanie) {
     self.textContent = 'ADDING...';
     self.style.background = '#333';
     self.disabled = true;
+
     if (cartHasBeanie) {
       addToCart(MP_BUNDLES['propaganda-beanie'].bundleWith, 1)
         .then(function() {
@@ -131,10 +142,16 @@ function initBundleLogic() {
   var pageSlug = getCurrentPageSlug();
   var bundleConfig = MP_BUNDLES[pageSlug];
   if (!bundleConfig) return;
-  var discountRow = document.querySelector('.discount-row');
-  var discountContent = document.querySelector('.discount-content');
+
+  var allDetailRows = document.querySelectorAll('.detail-row');
+  var discountRow = allDetailRows[allDetailRows.length - 1];
+  var allDetailContents = document.querySelectorAll('.detail-content');
+  var discountContent = allDetailContents[allDetailContents.length - 1];
+
   if (!discountRow || !discountContent) return;
+
   discountRow.style.display = 'flex';
+
   getCart().then(function(cart) {
     var cartHasBeanie = isInCart(cart, 'propaganda-beanie');
     buildBundleCard(bundleConfig, cartHasBeanie);
